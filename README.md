@@ -1,7 +1,7 @@
 # Kemono Party Crawler
 
 ## Purpose
-This can download image and video on kemono.party website.
+This can download image, video and etc. on kemono.party website.
 
 ## How to use
 1. Enter the painter name.
@@ -12,4 +12,6 @@ This can download image and video on kemono.party website.
 ## Keep in mid
 This crawler might be banned by IP address, use carefully.
 
-# Update py file later
+# Update convientence crawler in future (if I remember)
+1. Use "re" to find artist name in page.
+2. Create an excel to ignore the image or video which has downloaded.
