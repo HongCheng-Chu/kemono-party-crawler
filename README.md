@@ -17,4 +17,7 @@ This crawler might be banned by IP address, use carefully.
 2. Create an excel to ignore the image or video which has downloaded.
 
 ## Contact me
-Please send the problem to jerry840622@gmail.com, I try my best to help you.
+Please send the problem to jerry840622@gmail.com, I try my best to help you, thank you everyone.
+
+## Reference
+kemono-dl - AplhaSlayer1964(github)
