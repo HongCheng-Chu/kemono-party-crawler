@@ -14,7 +14,8 @@ This crawler might be banned by IP address, use carefully.
 
 ## Update convientence crawler in future (if I remember)
 1. Use "re" to find artist name in page.
-2. Create an excel to ignore the image or video which has downloaded.
+2. Create an excel to ignore the image or video which has downloaded, or save as json.
+3. Use selenium to find the artist name. (update soon)
 
 ## Contact me
 Please send the problem to jerry840622@gmail.com, I try my best to help you, thank you everyone.
