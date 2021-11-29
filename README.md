@@ -12,8 +12,9 @@ This can download image, video and etc. on kemono.party website.
 ## Keep in mind
 This crawler might be banned by IP address, use carefully.
 
-## Update convientence crawler in future (if I remember)
-1. Create an excel to ignore the image or video which has downloaded, or save as json.
+## Update convientence crawler in future
+1. Update Login in selenium as soon as posible. (maybe two weeks)
+2. Create a json to ignore the image or video which has downloaded.
 
 ## Contact me
 Please send the problem to jerry840622@gmail.com, I try my best to help you, thank you everyone.
