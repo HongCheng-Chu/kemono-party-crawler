@@ -13,7 +13,7 @@ This can download image, video and etc. on kemono.party website.
 This crawler might be banned by IP address, use carefully.
 
 ## Update convientence crawler in future
-1. Update Login in selenium as soon as posible. (maybe two weeks)
+1. Update Login in selenium will be finish before 2021/12/31.
 2. Create a json to ignore the image or video which has downloaded.
 
 ## Contact me
