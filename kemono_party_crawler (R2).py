@@ -8,15 +8,16 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from fake_useragent import UserAgent
 from datetime import datetime
+from selenium.webdriver.common.keys import Keys
 
 import savemysql
 
 
-def get_id(painter_name):
+def get_card(painter_name):
 
-    username = input('Enter you username')
+    username = input('Enter you username: ')
 
-    password = input('Enter you password')
+    password = input('Enter you password: ')
 
     ChromeOptions = Options()
 
@@ -34,7 +35,7 @@ def get_id(painter_name):
 
     driver.get("https://kemono.party/account/login")
 
-    time.sleep(5)
+    time.sleep(10)
 
     driver.find_element_by_name("username").send_keys(username)
 
@@ -50,27 +51,17 @@ def get_id(painter_name):
 
     driver.get("https://kemono.party/artists?o=0")
     
+    time.sleep(10)
+
+    driver.find_element_by_id("q").send_keys(painter_name, Keys.ENTER)
+
     time.sleep(5)
 
+    painter_url = driver.find_element_by_link_text(painter_name).get_attribute('href');
+    
     cookie = [item["name"] + "=" + item["value"] for item in driver.get_cookies()]
 
     cookiestr = ";".join(item for item in cookie)
-
-    painter_url = 'none';
-    
-    while Painter_id == 'none':
-
-        try:
-
-            Painter_id = driver.find_element_by_link_text(Painter_name).get_attribute('href')
-
-        except:
-
-            Painter_id = 'none';
-
-        driver.find_element_by_xpath("//*[@title='Next page']").click()
-        
-        time.sleep(5)
     
     driver.quit()
 
@@ -102,6 +93,8 @@ def get_post(url, next_page):
 
     posts = []
 
+    recent_update_day = savemysql.check_day()
+
     if next_page == 'none':
 
         page_html = get_html(url)
@@ -118,11 +111,22 @@ def get_post(url, next_page):
 
             link = "https://kemono.party" + parent.find('a')["href"]
 
-            post_time = card.find('time', {"class": "timestamp"}).getText().replace("\n", " ").strip()
+            try:
+
+                post_time = card.find('time', {"class": "timestamp"}).getText().replace("\n", " ").strip()
+
+            except:
+
+                post_time = str(datetime.now()).split(" ")[0]
 
             day = post_time.split(" ")[0]
 
-            posts.append({'title': title, 'post': link, 'img': [], 'video': [], 'day': day})
+            if day > recent_update_day:
+
+                posts.append({'title': title, 'post': link, 'img': [], 'video': [], 'day': day, 'name': painter_name})
+
+            else:
+                break
 
     while not next_page == 'none':
 
@@ -144,7 +148,12 @@ def get_post(url, next_page):
 
             day = post_time.split(" ")[1]
 
-            posts.append({'title': title, 'post': link, 'img': [], 'video': [], 'day': day})
+            if day > recent_update_day:
+
+                posts.append({'title': title, 'post': link, 'img': [], 'video': [], 'day': day, 'name': painter_name})
+
+            else:
+                break
 
         try:
             next_page = "https://kemono.party" + page_soup.find("a", {"title": "Next page"})["href"]
@@ -201,13 +210,15 @@ def Download_post(painter_dict):
 
             imgurl = "https://data3.kemono.party" + img
 
-            imgext = imgurl.split('.')[-1]
+            imgext = img.split('.')[-1]
+
+            title = data['title'].replace(':', ' ').replace('/', ' ')
                 
-            img_file_path = r'.\{0}\{1}.{2}'.format(Painter_name, data["title"] + "-" + iter, imgext)
+            img_file_path = r'.\{0}\{1}.{2}'.format(painter_name, (title + " {0}".format(iter)), imgext)
                 
             download_chunk(imgurl, img_file_path)
 
-            print('Img: {0} \n  Download Success'.format(data["title"]))
+            print('Image: {0} \n  Download Success'.format(title))
 
             iter = iter + 1
 
@@ -215,16 +226,15 @@ def Download_post(painter_dict):
 
             videourl = "https://data3.kemono.party" + video
 
-            videoext = videourl.split('.')[-1]
-                
-            if not ((urlext == 'mp4') or (urlext == 'zip')):
-                continue
+            videoext = video.split('.')[-1]
 
-            video_file_path = r'.\{0}\{1}.{2}'.format(Painter_name, data["title"] + "-" + iter, videoext)
+            title = data['title'].replace(':', ' ').replace('/', ' ')
+
+            video_file_path = r'.\{0}\{1}.{2}'.format(painter_name, (title + " {0}".format(iter)), videoext)
 
             download_chunk(videourl, video_file_path)
 
-            print('Video: {0} \n Download Success'.format(data["title"]))
+            print('Video: {0} \n Download Success'.format(title))
 
             iter = iter + 1
         
@@ -252,11 +262,11 @@ def main(url):
     print('get post success')
 
     painter_dict = get_img(posts)
-
+    
     print('get image success')
 
     '''
-    The following two functions are for your choice.
+    The following functions are for your choice.
     '''
 
     Download_post(painter_dict)
@@ -274,7 +284,7 @@ if __name__ == '__main__':
 
     painter_name = input('Artist name: ')
 
-    url, cookie = get_id(painter_name)
+    url, cookie = get_card(painter_name)
 
     main(url)
 
