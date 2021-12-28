@@ -68,7 +68,6 @@ def get_card(painter_name):
     return painter_url, cookiestr
 
 
-
 def download_chunk(url, path):
     with requests.get(url, headers = get_headers(), stream = True) as r:
         r.raise_for_status()
@@ -93,7 +92,7 @@ def get_post(url, next_page):
 
     posts = []
 
-    recent_update_day = savemysql.check_day()
+    recent_update_day = savemysql.check_day(painter_name)
 
     if next_page == 'none':
 
@@ -150,7 +149,7 @@ def get_post(url, next_page):
 
             if day > recent_update_day:
 
-                posts.append({'title': title, 'post': link, 'img': [], 'video': [], 'day': day, 'name': painter_name})
+                posts.append({'title': title, 'post': link, 'day': day, 'name': painter_name})
 
             else:
                 break
@@ -172,6 +171,8 @@ def get_img(posts):
 
     for post in posts:
 
+        img_url = []
+
         post_html = get_html(post['post'])
 
         page_soup = BeautifulSoup(post_html, 'html.parser')
@@ -182,7 +183,9 @@ def get_img(posts):
 
             pic = image.find('a', {'class': 'fileThumb'})['href']
 
-            post['img'].append(pic)
+            img_url.append("https://kemono.party/" + pic)
+
+        post['img'] = get_realurl(img_url)
 
         videos = page_soup.find_all("a", {"class": "post__attachment-link"})
 
@@ -194,6 +197,34 @@ def get_img(posts):
 
     return posts
 
+
+def get_realurl(urls):
+
+    ChromeOptions = Options()
+
+    ChromeOptions.add_argument('--headless')
+
+    prefs = {"profile.managed_default_content_settings.images": 2}
+
+    ChromeOptions.add_experimental_option("prefs", prefs)
+
+    # time.sleep is choose on you.
+
+    driver = webdriver.Chrome(chrome_options = ChromeOptions)
+
+    real_url = []
+
+    for url in urls:
+
+        driver.get(url)
+    
+        time.sleep(5)
+
+        real_url.append(driver.current_url)
+    
+    driver.quit()
+
+    return real_url
 
 
 def Download_post(painter_dict):
@@ -208,13 +239,13 @@ def Download_post(painter_dict):
 
         for img in data["img"]:
 
-            imgurl = "https://data3.kemono.party" + img
+            imgurl = img
 
             imgext = img.split('.')[-1]
 
             title = data['title'].replace(':', ' ').replace('/', ' ')
                 
-            img_file_path = r'.\{0}\{1}.{2}'.format(painter_name, (title + " {0}".format(iter)), imgext)
+            img_file_path = r'.\{0}\{1}.{2}'.format(painter_name, (title + "-{0}".format(iter)), imgext)
                 
             download_chunk(imgurl, img_file_path)
 
@@ -224,7 +255,7 @@ def Download_post(painter_dict):
 
         for video in data["video"]:
 
-            videourl = "https://data3.kemono.party" + video
+            videourl = video
 
             videoext = video.split('.')[-1]
 
@@ -273,7 +304,7 @@ def main(url):
 
     print('Download all post image & video success')
 
-    savemysql.sql_saved(painter_dict)
+    savemysql.sql_saved(painter_dict, painter_name)
 
     print('SQL save success')
     

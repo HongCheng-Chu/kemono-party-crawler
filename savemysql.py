@@ -31,7 +31,7 @@ def create_database(sql_password):
     return 'kemono'
 
 
-def sql_saved(dicts):
+def sql_saved(dicts, name):
 
     sql_password = input('sql password : ')
 
@@ -53,14 +53,14 @@ def sql_saved(dicts):
     cursor = connection.cursor()
 
     try:
-        sql = "create table if not exists artwork(\
+        sql = "create table if not exists {0}(\
                day varchar(50),\
                name varchar(50),\
                title varchar(250),\
                image varchar(300),\
                video varchar(300),\
                primary key (title)\
-               )engine=InnoDB DEFAULT CHARSET=utf8;"
+               )engine=InnoDB DEFAULT CHARSET=utf8;".format(name)
 
         cursor.execute(sql)
 
@@ -78,7 +78,7 @@ def sql_saved(dicts):
 
         for i in dict["img"]:
 
-            sql = "insert into artwork (day, name, title, image) VALUES (%s, %s, %s, %s)"
+            sql = "insert into {0} (day, name, title, image) VALUES (%s, %s, %s, %s)".format(dict['name'])
 
             val = (dict['day'], dict['name'], dict['title']+"-{0}".format(iter), i)
 
@@ -91,16 +91,16 @@ def sql_saved(dicts):
                 # 提交到數據庫
                 connection.commit()
 
-                print('{0} save success in vidoes list'.format(dict['name']))
+                print('{0} image put in {1} book success'.format(dict['title'], dict['name']))
             except:
                 # 發生錯誤跳回
                 connection.rollback()
 
-                print('{0} already save in vidoes list'.format(dict['name']))
+                print('{0} image already save in {1} book'.format(dict['title'], dict['name']))
         
         for i in dict["video"]:
 
-            sql = "insert into artwork (day, name, title, video) VALUES (%s, %s, %s, %s)"
+            sql = "insert into {0} (day, name, title, video) VALUES (%s, %s, %s, %s)".format(dict['name'])
 
             val = (dict['day'], dict['name'], dict['title']+"-{0}".format(iter), i)
 
@@ -113,12 +113,12 @@ def sql_saved(dicts):
                 # 提交到數據庫
                 connection.commit()
 
-                print('{0} save success in vidoes list'.format(dict['name']))
+                print('{0} video put in {1} book success'.format(dict['title'], dict['name']))
             except:
                 # 發生錯誤跳回
                 connection.rollback()
 
-                print('{0} already save in vidoes list'.format(dict['name']))
+                print('{0} video already save in {1} book'.format(dict['title'], dict['name']))
 
         iter = 0
 
@@ -126,7 +126,7 @@ def sql_saved(dicts):
     connection.close()
 
 
-def check_day():
+def check_day(name):
 
     sql_password = input('sql password : ')
 
@@ -147,20 +147,20 @@ def check_day():
 
     cursor = connection.cursor()
 
-    recent_day = ''
-
     try:
-        sql = "select day from artwork order by day desc"
+        sql = "select day from artwork where name = '{0}' order by day desc".format(name)
 
         cursor.execute(sql)
 
-        recent_day = cursor.fetchone()
+        recent_day = cursor.fetchone()['day']
 
         print('get recent update day success')
 
     except:
         connection.rollback()
 
-        print('Can not find artwork table')
+        recent_day = '0000-00-00'
+
+        print('Can not find {0} table'.format(name))
 
     return recent_day
